@@ -22,7 +22,7 @@ public class Review {
 	@Column(name = "drama_id", nullable = false)
 	private int dramaID;
 	
-	@Column(name = "watch_status")
+	@Column(name = "watch_status", nullable = false)
 	private Integer watchStatus;
 	
 	@Column(name = "episode_selected")
@@ -57,7 +57,7 @@ public class Review {
 	public void setUserID(int userID) {this.userID = userID;}
 	public void setDramaID(int dramaID) {this.dramaID = dramaID;}
 	public void setWatchStatus(int watchStatus) {this.watchStatus = watchStatus;}
-	public void setEpisodeSelected(int episodeSelected) {this.episodeSelected = episodeSelected;}
+	public void setEpisodeSelected(Integer episodeSelected) {this.episodeSelected = episodeSelected;}
 	public void setContent(String content) {this.content = content;}
 	public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;}
 	public void setRating(BigDecimal rating) {this.rating = rating;}

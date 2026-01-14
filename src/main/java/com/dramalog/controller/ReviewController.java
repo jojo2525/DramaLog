@@ -4,9 +4,14 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.dramalog.dto.ReviewCreateRequest;
+import com.dramalog.dto.ReviewResponse;
 import com.dramalog.model.Review;
 import com.dramalog.model.User;
 import com.dramalog.service.ReviewService;
@@ -29,7 +34,6 @@ public class ReviewController {
 	}
 	
 	// 홈: 나의 리뷰 목록 (currentUser 버전, 현재 로그인된 유저의 리뷰를 가져온다.)
-	
 	@GetMapping("/reviews/me")
 	public List<Review> myReviews(HttpSession session) {
 	    User me = (User) session.getAttribute("currentUser");
@@ -51,5 +55,13 @@ public class ReviewController {
 			return reviewService.getOverallReviews(dramaID);
 		}
 		return reviewService.getEpisodeReviews(dramaID, episodeSelected);
+	}
+	
+	// 리뷰 작성
+	@PostMapping("/dramas/{dramaID}/reviews")
+	public ReviewResponse createReview(
+			@PathVariable Integer dramaID,
+			@RequestBody ReviewCreateRequest request) {
+		return reviewService.createReview(dramaID, request);
 	}
 }
