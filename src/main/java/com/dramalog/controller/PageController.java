@@ -28,8 +28,17 @@ public class PageController {
         String name = (currentUser != null && currentUser.getName() != null && !currentUser.getName().isBlank())
                 ? currentUser.getName()
                 : "홍길동";
+        
+        int level = (currentUser != null && currentUser.getLevel() != null)
+                ? currentUser.getLevel()
+                : 1; // 기본 1
+        
+        if (level < 1) level = 1;   // 0이면 1로 (DB 연결 문제 해결)
+        if (level > 3) level = 3;
+
 
         model.addAttribute("userName", name);
+        model.addAttribute("level", level);
 
         return "home";
     }
