@@ -41,7 +41,9 @@
 
   <section class="btnRow">
     <a class="btn" th:href="@{'/review/new/' + ${dramaId}}">리뷰 작성하기</a>
-    <a class="btn" th:href="@{'/chat/' + ${dramaId}}">실시간 채팅방</a>
+	<a class="btn" th:href="@{/dramas/{id}/chat(id=${dramaId})}">
+	  실시간 채팅방
+	</a>
   </section>
 
   <section class="reviewSection">

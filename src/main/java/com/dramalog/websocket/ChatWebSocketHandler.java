@@ -16,6 +16,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.dramalog.dto.ChatMessageRequest;
 import com.dramalog.dto.ChatMessageResponse;
 import com.dramalog.model.User;
+import com.dramalog.service.ChatMessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -26,6 +27,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 	private static final int MAX_TEXT_LEN = 300;
 	private static final int MAX_MSG_PER_SEC = 5;
 	
+	// 서비스 주입 
+	private final ChatMessageService chatService;
+	
 	// JSON <-> Java 객체 변환기 (dto 파싱/생성에 사용)
 	private final ObjectMapper om = new ObjectMapper();
 	
@@ -35,6 +39,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     
     // rate: sessionID가 최근 1초 동안 몇 번 보냈는지 카운터
     private final ConcurrentMap<String, RateCounter> rate = new ConcurrentHashMap<>();
+    
+    
+    // 생성자 주입 
+    public ChatWebSocketHandler(ChatMessageService chatService) {
+        this.chatService = chatService;
+    }
 
     // WebSocket 연결 성공 후 1번 호출
     @Override
@@ -84,11 +94,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     	if (text.length() > MAX_TEXT_LEN) {text = text.substring(0, MAX_TEXT_LEN);} // 300자 이상은 자른다.
     	// 6. 서버 세션의 로그인 유저 이름을 sender로 설정한다.
     	String sender = user.getName();
+    	
+    	long ts = Instant.now().toEpochMilli();
+
     	// 7. 서버 -> 클라이언트로 보내는 ChatMessageResponse
     	ChatMessageResponse out = new ChatMessageResponse(
-    			sender,
-    			text,
-    			Instant.now().toEpochMilli());
+    	        sender,
+    	        text,
+    	        ts);
+
+    	// ★ DB 저장 추가
+    	chatService.save(dramaID, sender, text, ts);
+    	
     	String payload = om.writeValueAsString(out);
     	// 8. 채팅방 내의 세션들에게 브로드캐스트
     	Set<WebSocketSession> targets = rooms.getOrDefault(dramaID, new CopyOnWriteArraySet<>());

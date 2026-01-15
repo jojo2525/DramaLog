@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>DramaLog Chat</title>
+  <link rel="stylesheet" href="/css/chat-room.css">
+</head>
+<body>
+	<header class="topbar">
+	  <button class="back" onclick="history.back()">←</button>
+	  <h1 class="pageTitle">실시간 채팅</h1>
+	</header>
+
+	<!-- topbar 바로 아래에 붙는 드라마 스트립 (스크롤해도 고정) -->
+	<a class="dramaStrip" th:href="@{/drama/{id}(id=${dramaId})}">
+	  <img class="dramaThumb" th:src="${dramaThumb}" alt="thumb">
+	  <div class="dramaText">
+	    <div class="dramaTitle" th:text="${dramaTitle}">드라마 제목</div>
+	    <div class="dramaSub">드라마 상세로 이동</div>
+	  </div>
+	  <div class="chev">›</div>
+	</a>
+
+  <!-- 서버에서 박아주는 값 -->
+  <input type="hidden" id="dramaId" th:value="${dramaId}">
+  <input type="hidden" id="myName"  th:value="${username}">
+
+  <main class="wrap">
+    <div id="chatBox" class="chatBox"></div>
+
+    <div class="inputRow">
+      <input id="msg" class="msg" maxlength="300" placeholder="메시지 입력..." />
+      <button id="send" class="send">전송</button>
+    </div>
+  </main>
+
+<script>
+  const dramaId = document.getElementById('dramaId').value;
+  const myName  = document.getElementById('myName').value;
+
+  const chatBox = document.getElementById('chatBox');
+  const msgInput = document.getElementById('msg');
+  const sendBtn = document.getElementById('send');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function formatTs(ts){
+    const d = new Date(ts);
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth()+1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+  }
+
+  function scrollBottom(){
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function renderMessage(m){
+    const isMe = (m.sender === myName);
+    const row = document.createElement('div');
+    row.className = 'row ' + (isMe ? 'me' : 'you');
+
+    row.innerHTML = `
+      <div class="bubble">
+        <div class="meta">
+          <span class="sender">${m.sender}</span>
+          <span class="time">${formatTs(m.ts)}</span>
+        </div>
+        <div class="text"></div>
+      </div>
+    `;
+    row.querySelector('.text').innerText = m.text;
+    chatBox.appendChild(row);
+  }
+
+  async function loadHistory(){
+	try{
+	    const res = await fetch(`/api/chat/${dramaId}/history?limit=100`);
+	    if(!res.ok){
+	      console.log("history http error:", res.status);
+	      return;
+	    }
+	    const list = await res.json();
+	    chatBox.innerHTML = '';
+	    list.forEach(renderMessage);
+	    scrollBottom();
+	  }catch(e){
+	    console.log("history json error:", e);
+	  }
+  }
+
+  // 1) 먼저 히스토리 로드
+  // 2) 그 다음 WS 연결
+  let ws;
+
+  function connectWs(){
+	if (ws && (ws.readyState === 0 || ws.readyState === 1)) return; // 이미 연결중/연결됨이면 중복연결 금지
+	
+	const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+	  const url = `${proto}://${location.host}/ws/chat/${dramaId}`;
+	  console.log("WS connecting:", url);
+
+	  ws = new WebSocket(url);
+
+	  ws.onopen = () => console.log("WS connected");
+	  ws.onerror = (e) => console.log("WS error", e);
+	  ws.onclose = (e) => console.log("WS closed", e.code, e.reason);
+
+	  ws.onmessage = (ev) => {
+	    const m = JSON.parse(ev.data);
+	    renderMessage(m);
+	    scrollBottom();
+	  };
+  }
+  
+  // 시작: 히스토리는 실패해도 되고, WS는 무조건 연결
+  (async () => {
+    await loadHistory();
+    connectWs();
+  })();
+
+  function send(){
+    const text = msgInput.value.trim();
+    if(!text) return;
+
+    if(!ws || ws.readyState !== 1){
+      console.log("WS not connected:", ws?.readyState);
+      alert("웹소켓 연결이 아직 안 됐어! 새로고침 해봐.");
+      return;
+    }
+
+    ws.send(JSON.stringify({ text }));
+    msgInput.value = '';
+    msgInput.focus();
+  }
+  
+  sendBtn.addEventListener('click', send);
+  msgInput.addEventListener('keydown', (e) => {
+    // 한글 입력 조합 중(IME)에는 Enter 전송 막기
+    if (e.isComposing) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if(ws && ws.readyState === 1) ws.close();
+  });
+
+  // 시작
+  loadHistory().then(connectWs);
+</script>
+</body>
+</html>

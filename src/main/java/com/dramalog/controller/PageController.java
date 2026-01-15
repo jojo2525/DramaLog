@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.ui.Model;
 
+import com.dramalog.dto.DramaDetailResponse;
 import com.dramalog.model.User;
 import com.dramalog.repository.UserRepository;
+import com.dramalog.service.DramaService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -14,11 +16,13 @@ import jakarta.servlet.http.HttpSession;
 public class PageController {
 
     private final UserRepository userRepo;
+    private final DramaService dramaService;
 
-    public PageController(UserRepository userRepo) {
+    public PageController(UserRepository userRepo, DramaService dramaService) {
         this.userRepo = userRepo;
+        this.dramaService = dramaService;
     }
-
+    
     @GetMapping("/login")
     public String loginPage() {
         return "login";
@@ -92,10 +96,24 @@ public class PageController {
         return "review-new";
     }
     
-    // 채팅방 테스트용: 나중에 지우기!
-    @GetMapping("/test/chat")
-    public String testChat() {
-        return "test-chat";
+
+ // 채팅방 페이지
+    @GetMapping("/dramas/{dramaId}/chat")
+    public String chatRoom(@PathVariable Integer dramaId, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) return "redirect:/login";
+
+        // 드라마 상세 조회
+        DramaDetailResponse drama = dramaService.getDramaDetail(dramaId);
+
+        model.addAttribute("dramaId", dramaId);
+        model.addAttribute("username", user.getName());
+
+        // 상단 고정 바에 쓸 정보
+        model.addAttribute("dramaTitle", drama.getTitle());
+        model.addAttribute("dramaThumb", drama.getCoverImage());
+
+        return "chat-room";
     }
 
 }

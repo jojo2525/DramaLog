@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 	
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(handler, "/ws/chat/{dramaID}")
+		registry.addHandler(handler, "/ws/chat/*")
 				.addInterceptors(new HttpSessionHandshakeInterceptor()) // HttpSession의 currentUser를 WebSocketSession attributes로 복사
 				.setAllowedOriginPatterns("*"); // 도메인 정해지면 그쪽에서만 들어올 수 있게 수정
 	}	

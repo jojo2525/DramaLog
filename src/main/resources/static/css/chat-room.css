@@ -1,0 +1,229 @@
+/* chat-room.css (통째로 복붙) */
+
+:root{
+  --app-width: 430px;  /*  모바일 느낌 폭 (390~520 사이로 조절) */
+  --app-bg: #B2C7DA; 
+}
+
+* { box-sizing: border-box; }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  background:#F6F3EE; /* 양옆 미색 */
+  color:#111;
+}
+
+/* =========================
+   1) 최상단 헤더 (가운데 폭)
+   ========================= */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 52px;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+
+  max-width: var(--app-width);
+  margin: 0 auto;
+
+  background:#fff;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  border-left: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.back{
+  border:none;
+  background:transparent;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.pageTitle{
+  margin:0;
+  font-size:16px;
+  font-weight:700; 
+}
+
+/* =========================
+   2) 드라마 스트립 (topbar 아래 고정, 가운데 폭)
+   ========================= */
+.dramaStrip{
+  position: sticky;
+  top: 52px;
+  z-index: 25;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+
+  max-width: var(--app-width);
+  margin: 0 auto;
+
+  background:rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  text-decoration:none;
+  color:#111;
+
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  border-left: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.dramaThumb{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  object-fit:cover;
+  border:1px solid rgba(0,0,0,0.08);
+  flex:0 0 auto;
+}
+
+.dramaText{ min-width:0; flex:1; }
+
+.dramaTitle{
+  font-weight:700;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.dramaSub{
+  margin-top:2px;
+  font-size:12px;
+  color:#666;
+  font-weight:500; 
+}
+
+.chev{
+  font-size:22px;
+  color:#888;
+  flex:0 0 auto;
+}
+
+/* =========================
+   3) 채팅 화면 영역 (가운데 폭 + 파란 배경)
+   ========================= */
+.wrap{
+  max-width: var(--app-width);
+  margin: 0 auto;
+
+  background: var(--app-bg); /* 채팅 영역만 파랑 */
+  min-height: calc(100vh - 52px - 62px); /* topbar+strip 제외 */
+
+  padding: 12px 14px;
+  padding-bottom: 90px; /* 입력창 영역 여유 */
+
+  border-left: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+/* 채팅 박스 */
+.chatBox{
+  width: 100%;
+  margin: 0;
+  min-height: calc(100vh - 52px - 62px - 110px); /* topbar+strip+input 고려 */
+  padding: 6px 0;
+}
+
+/* 메시지 한 줄 */
+.row{
+  display:flex;
+  margin: 10px 0;
+}
+.row.me{ justify-content:flex-end; }
+.row.you{ justify-content:flex-start; }
+
+/* 말풍선 */
+.bubble{
+  max-width: min(520px, 78%);
+  padding: 10px 12px;
+  border-radius: 14px;
+  background:#fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+.row.me .bubble{
+  background:#E6F4D7; /* 내 말풍선 연두 */
+}
+
+/* 닉/시간 */
+.meta{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+  margin-bottom:6px;
+}
+
+.sender{
+  font-weight:600; 
+  font-size:12px;
+  color:#222;
+}
+
+.time{
+  font-size:12px;
+  color:#777;
+  font-weight:500; 
+}
+
+/* 본문 */
+.text{
+  font-size:16px;
+  font-weight:400; 
+  line-height:1.45;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* =========================
+   4) 입력창 하단 고정 (가운데 폭)
+   ========================= */
+.inputRow{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom:0;
+  z-index: 40;
+
+  width: min(var(--app-width), 100%);
+  display:flex;
+  gap:10px;
+  padding:12px 14px;
+
+  background:rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+
+  border-top:1px solid rgba(0,0,0,0.06);
+  border-left: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.msg{
+  flex:1;
+  height:48px;
+  border-radius:12px;
+  border:2px solid #2B6DF6;
+  padding: 0 14px;
+  font-size:15px;
+  font-weight:400;
+  outline:none;
+}
+
+.send{
+  height:48px;
+  padding:0 16px;
+  border:none;
+  border-radius:12px;
+  background:#111;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
